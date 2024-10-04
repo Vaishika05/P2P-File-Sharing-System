@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P File Sharing</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <h1>Welcome, <%= username %>!</h1>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="username" value="<%= username %>">
+        <input type="file" name="file" required>
+        <button type="submit">Upload File</button>
+    </form>
+
+    <h2>Shared Files:</h2>
+    <ul id="fileList">
+        <% files.forEach(function(file) { %>
+            <li>
+                <a href="/download/<%= file.filename %>">
+                    <%= file.filename %>
+                </a> (Uploaded by: <%= file.uploader %>)
+            </li>
+            <% }); %>
+    </ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
+</body>
+
+</html>
