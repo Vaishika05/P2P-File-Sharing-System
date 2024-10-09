@@ -13,7 +13,7 @@ const FileUpload = () => {
         formData.append("file", file);
 
         try {
-            const response = await fetch("http://localhost:5001/file/upload", {
+            const response = await fetch("http://localhost:5000/file/upload", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`, // Add your token handling here
