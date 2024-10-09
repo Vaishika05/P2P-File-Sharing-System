@@ -38,6 +38,9 @@ const FileUpload = () => {
                 <input type="file" onChange={handleFileChange} required />
                 <button type="submit">Upload</button>
             </form>
+            <p>
+                Redirect to Home Page <a href="/home">Home Page</a>
+            </p>
         </div>
     );
 };

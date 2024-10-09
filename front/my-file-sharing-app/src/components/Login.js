@@ -27,7 +27,7 @@ const Login = () => {
 
             const data = await response.json();
             console.log("Response data:", data);
-            window.location.href = "/upload";
+            window.location.href = "/home";
         } catch (error) {
             console.error("Error during login:", error); // Error log
             alert("Failed to connect to the server.");

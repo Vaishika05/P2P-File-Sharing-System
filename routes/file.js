@@ -41,9 +41,14 @@ module.exports = (io) => {
     });
 
     // Home page after registration
-    router.get("/home", (req, res) => {
-        const username = req.query.username;
-        res.render("index", { username, files: sharedFiles });
+    // Home page after registration (fetch all files)
+    router.get("/home", async (req, res) => {
+        try {
+            const files = await File.find(); // Fetch all files from the database
+            res.json({ files }); // Send all files as a response
+        } catch (error) {
+            res.status(500).json({ error: "Error fetching files" });
+        }
     });
 
     // Download file
