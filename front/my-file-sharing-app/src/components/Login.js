@@ -6,24 +6,31 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        console.log("Attempting to login with:", username, password);
         try {
-            const response = await fetch("http://localhost:5001/auth/login", {
+            const response = await fetch("http://localhost:5000/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ username, password }),
+                credentials: "include",
             });
-            const data = await response.json();
-            if (response.ok) {
-                // Handle successful login (e.g., save token, redirect)
-                console.log(data);
-                window.location.href = "/upload"; // Redirect to upload page
-            } else {
+
+            console.log("Response status:", response.status); // Log status code
+
+            if (!response.ok) {
+                const data = await response.json();
                 alert(data.error);
+                return;
             }
+
+            const data = await response.json();
+            console.log("Response data:", data);
+            window.location.href = "/upload";
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error during login:", error); // Error log
+            alert("Failed to connect to the server.");
         }
     };
 
