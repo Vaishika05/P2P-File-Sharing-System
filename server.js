@@ -4,14 +4,36 @@ const socketIo = require("socket.io");
 const path = require("path");
 const multer = require("multer");
 const mongoose = require("mongoose");
+const cors = require("cors");
+const userRoutes = require("./routes/auth.js");
+// const bcrypt = require("bcryptjs");
 
 // Models
-const User = require("./models/User");
+// const User = require("./models/User");
 const File = require("./models/File");
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+// app.use(cors());
+app.use(
+    cors({
+        origin: "http://localhost:3000", // Adjust this to your frontend's URL
+        methods: ["GET", "POST"],
+        credentials: true, // Include if you need to send cookies
+    })
+);
+
+app.use(express.json());
+
+// app.use(express.static(path.join(__dirname, "client/build")));
+
+// app.get("*", (req, res) => {
+//     res.sendFile(path.join(__dirname, "client/build", "index.html"));
+// });
+
+// const authRoutes = require("./routes/auth");
+// const fileRoutes = require("./routes/file");
 
 const uploadDir = path.join(__dirname, "uploads");
 const upload = multer({ dest: uploadDir }); // Save uploaded files here
@@ -23,6 +45,13 @@ mongoose
         {
             useNewUrlParser: true,
             useUnifiedTopology: true,
+        },
+        {
+            ssl: true,
+            sslValidate: true, // Not recommended for production
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            tlsAllowInvalidCertificates: true,
         }
     )
     .then(() => console.log("MongoDB connected..."))
@@ -38,23 +67,7 @@ app.set("view engine", "ejs");
 let sharedFiles = [];
 
 // User Registration Route
-app.post("/register", async (req, res) => {
-    console.log("Received registration data:", req.body); // Log incoming request body
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({ error: "Username and password are required." });
-    }
-
-    try {
-        const newUser = new User({ username, password });
-        await newUser.save();
-        res.status(201).json({ message: "User registered successfully" });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
+app.use("/auth", userRoutes);
 // File Upload Route
 app.post("/upload", upload.single("file"), async (req, res) => {
     const file = req.file;
@@ -103,3 +116,17 @@ io.on("connection", (socket) => {
 // Start the server
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// const jwt = require("jsonwebtoken");
+
+// const authMiddleware = (req, res, next) => {
+//     const token = req.headers["authorization"];
+//     if (!token) return res.sendStatus(403);
+//     jwt.verify(token.split(" ")[1], process.env.JWT_SECRET, (err, user) => {
+//         if (err) return res.sendStatus(403);
+//         req.user = user;
+//         next();
+//     });
+// };
+
+// module.exports = authMiddleware;
