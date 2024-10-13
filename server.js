@@ -3,7 +3,6 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const path = require("path");
-// const multer = require("multer");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
@@ -15,7 +14,7 @@ const fileRoutes = require("./routes/file")(io); // Pass io to files route
 app.use(
     cors({
         origin: "http://localhost:3000",
-        methods: ["GET", "POST"],
+        methods: ["GET", "POST", "DELETE"],
         credentials: true, // Include if you need to send cookies
     })
 );
@@ -32,7 +31,7 @@ mongoose
         },
         {
             ssl: true,
-            sslValidate: true, // Not recommended for production
+            sslValidate: true,
             useNewUrlParser: true,
             useUnifiedTopology: true,
             tlsAllowInvalidCertificates: true,

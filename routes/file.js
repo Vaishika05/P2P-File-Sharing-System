@@ -61,5 +61,32 @@ module.exports = (io) => {
         }
     });
 
+    // Delete File Route
+    router.delete("/delete/:filename", async (req, res) => {
+        const filename = req.params.filename;
+
+        try {
+            // Find the file by its filename in the database
+            const file = await File.findOne({ filename });
+
+            if (!file) {
+                return res.status(404).send("File not found.");
+            }
+
+            // Remove the file from the sharedFiles array
+            sharedFiles = sharedFiles.filter((f) => f.filename !== filename);
+
+            // Delete file from the database and file system
+            await File.deleteOne({ filename });
+
+            // Emit a WebSocket event to notify clients about the file deletion
+            io.emit("deleteFile", filename);
+
+            res.status(200).json({ message: "File deleted successfully." });
+        } catch (error) {
+            res.status(500).json({ error: "Error deleting file." });
+        }
+    });
+
     return router;
 };

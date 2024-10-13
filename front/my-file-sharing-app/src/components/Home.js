@@ -66,6 +66,25 @@ const Home = () => {
         window.location.href = `http://localhost:5000/file/download/${filename}`;
     };
 
+    const handleDelete = async (filename) => {
+        try {
+            const response = await fetch(`http://localhost:5000/file/delete/${filename}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+
+            if (response.ok) {
+                alert("File deleted successfully!");
+                // Remove the file from the list
+                setFiles(files.filter((file) => file.filename !== filename));
+            } else {
+                console.error("Failed to delete file");
+            }
+        } catch (error) {
+            console.error("Error deleting file:", error);
+        }
+    };
+
     return (
         <div>
             <h1>Welcome!</h1>
@@ -84,6 +103,7 @@ const Home = () => {
                     <li key={file.filename}>
                         <span>{file.filename}</span>
                         <button onClick={() => handleDownload(file.filename)}>Download</button>
+                        <button onClick={() => handleDelete(file.filename)}>Delete</button>
                     </li>
                 ))}
             </ul>
