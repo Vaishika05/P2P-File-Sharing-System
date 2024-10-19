@@ -5,10 +5,26 @@ const socketIo = require("socket.io");
 const path = require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const session = require("express-session");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+    cors: {
+        origin: "http://localhost:3000", // Frontend URL
+        methods: ["GET", "POST"],
+        credentials: true,
+    },
+});
+
+app.use(
+    session({
+        secret: "your-secret-key",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: false }, // Set to true if using HTTPS
+    })
+);
 const userRoutes = require("./routes/auth.js");
 const fileRoutes = require("./routes/file")(io); // Pass io to files route
 app.use(
@@ -48,12 +64,30 @@ app.set("view engine", "ejs");
 
 // User Registration Route
 app.use("/auth", userRoutes);
-app.use("/file", fileRoutes); // Pass WebSocket (io) to file routes
+app.use("/file", fileRoutes);
 
 // WebSocket connection
 io.on("connection", (socket) => {
-    console.log("New client connected");
-    socket.on("disconnect", () => console.log("Client disconnected"));
+    const loginTime = new Date().toLocaleString();
+    console.log("A peer has connected:", socket.id);
+    // Notify all peers that a new peer has logged in
+    io.emit("peer-login", {
+        message: `Peer ${socket.id} has logged in.`,
+        time: loginTime,
+    });
+    console.log("A new client connected");
+
+    socket.on("file-uploaded", (newFile) => {
+        io.emit("file-uploaded", newFile); // Broadcast the new file to all clients
+    });
+
+    socket.on("file-deleted", (filename) => {
+        io.emit("file-deleted", filename); // Broadcast file deletion
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Client disconnected");
+    });
 });
 
 // Start the server
