@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    ipAddress: {
+        type: String,
+        default: null, // Store IP address, null by default
+    },
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -6,6 +6,7 @@ const Home = () => {
     const [filteredFiles, setFilteredFiles] = useState([]); // Filtered files for search
     const [selectedFile, setSelectedFile] = useState(null);
     const [searchQuery, setSearchQuery] = useState(""); // Search input state
+    const [recipientIp, setRecipientIp] = useState(""); // Store recipient's IP address
 
     // Initialize the socket connection
     useEffect(() => {
@@ -116,10 +117,12 @@ const Home = () => {
         }
     };
 
+    // Handle file download
     const handleDownload = (filename) => {
         window.location.href = `http://localhost:5000/file/download/${filename}`;
     };
 
+    // Handle file delete
     const handleDelete = async (filename) => {
         try {
             const response = await fetch(`http://localhost:5000/file/delete/${filename}`, {
@@ -140,24 +143,59 @@ const Home = () => {
         }
     };
 
+    // Handle file transfer to a peer by IP
+    const handleTransfer = async (e) => {
+        e.preventDefault();
+        if (!selectedFile || !recipientIp) {
+            alert("Please select a file and enter the recipient's IP address.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        formData.append("recipientIp", recipientIp); // Include recipient's IP in the request
+
+        try {
+            const response = await fetch("http://localhost:5000/file/transfer", {
+                method: "POST",
+                body: formData,
+                credentials: "include",
+            });
+
+            if (response.ok) {
+                alert("File transferred successfully!");
+            } else {
+                console.error("Failed to transfer file");
+            }
+        } catch (error) {
+            console.error("Error transferring file:", error);
+        }
+    };
+
     return (
         <div>
             <h1>Welcome!</h1>
             {/* Logout button */}
             <button onClick={handleLogout}>Logout</button>
-            {/* Notifications Section
-            <h2>Peer Notifications</h2>
-            <ul>
-                {notifications.map((notification, index) => (
-                    <li key={index}>{notification}</li>
-                ))}
-            </ul> */}
 
             {/* Upload Section */}
             <h2>Upload a File</h2>
             <form onSubmit={handleFileUpload}>
                 <input type="file" onChange={handleFileChange} />
                 <button type="submit">Upload</button>
+            </form>
+
+            {/* Transfer Section */}
+            <h2>Transfer a File to a Peer</h2>
+            <form onSubmit={handleTransfer}>
+                <input type="file" onChange={handleFileChange} />
+                <input
+                    type="text"
+                    placeholder="Recipient IP Address"
+                    value={recipientIp}
+                    onChange={(e) => setRecipientIp(e.target.value)}
+                />
+                <button type="submit">Transfer</button>
             </form>
 
             {/* Search Section */}

@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-const path = require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const session = require("express-session");
@@ -27,6 +26,7 @@ app.use(
 );
 const userRoutes = require("./routes/auth.js");
 const fileRoutes = require("./routes/file")(io); // Pass io to files route
+
 app.use(
     cors({
         origin: "http://localhost:3000",
