@@ -14,6 +14,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null, // Store IP address, null by default
     },
+    status: { type: String, enum: ["online", "offline"], default: "online" },
+    lastActive: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("User", userSchema);

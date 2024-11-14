@@ -2,8 +2,12 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs"); // Import the fs module
 const File = require("../models/File");
+const User = require("../models/User"); // Adjust the path according to where your User model is located
+
 const axios = require("axios");
+const http = require("http"); // Required for HTTP requests
 
 module.exports = (io) => {
     const router = express.Router();
@@ -13,6 +17,52 @@ module.exports = (io) => {
 
     // To store the files in memory for demo purposes (this should ideally be handled through a database)
     let sharedFiles = [];
+    // Adjusted Route to Transfer Files to a Peer by Username or IP
+    router.post("/file/transfer", (req, res) => {
+        const { file, recipientUsername } = req.body;
+
+        if (!file || !recipientUsername) {
+            return res.status(400).json({ message: "File and recipient username are required." });
+        }
+
+        // Logic to find the recipient by username and transfer the file
+        const recipient = findUserByUsername(recipientUsername); // Example function to find user
+
+        if (!recipient) {
+            return res.status(404).json({ message: "Recipient not found" });
+        }
+
+        // Logic for transferring the file (e.g., saving it to the recipient's folder)
+        // This can be done via file sharing or some socket event to notify the recipient
+        transferFile(file, recipient)
+            .then(() => res.status(200).json({ message: "File transferred successfully!" }))
+            .catch((err) => res.status(500).json({ message: "Error transferring file", error: err }));
+    });
+    // Endpoint for Receiving Files from Other Peers
+    router.post("/receive", upload.single("file"), (req, res) => {
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).send("No file received.");
+        }
+
+        const filePath = path.join(uploadDir, file.originalname);
+
+        // Save received file and store in sharedFiles array
+        fs.rename(file.path, filePath, (err) => {
+            if (err) {
+                console.error("Error saving file:", err);
+                return res.status(500).send("Error saving file.");
+            }
+
+            sharedFiles.push({
+                filename: file.originalname,
+                filepath: filePath,
+            });
+
+            res.status(200).json({ message: "File received successfully." });
+        });
+    });
 
     // File Upload Route
     router.post("/upload", upload.single("file"), async (req, res) => {
@@ -165,6 +215,10 @@ module.exports = (io) => {
             });
 
             reqFileTransfer.end();
+
+            // After successfully transferring the file, notify the recipient's system
+            // Emit the new file to the recipient's WebSocket client
+            io.to(recipientIp).emit("newFile", { filename: file.originalname, filepath: filePath });
 
             res.status(200).send("File transfer initiated.");
         } catch (error) {

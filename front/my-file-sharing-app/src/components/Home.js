@@ -6,8 +6,8 @@ const Home = () => {
     const [filteredFiles, setFilteredFiles] = useState([]); // Filtered files for search
     const [selectedFile, setSelectedFile] = useState(null);
     const [searchQuery, setSearchQuery] = useState(""); // Search input state
-    const [recipientIp, setRecipientIp] = useState(""); // Store recipient's IP address
-
+    const [recipientUsername, setRecipientUsername] = useState(""); // Store recipient's username
+    const [selectedTransferFile, setSelectedTransferFile] = useState(null); // File for transfer
     // Initialize the socket connection
     useEffect(() => {
         const socket = io("http://localhost:5000");
@@ -143,17 +143,22 @@ const Home = () => {
         }
     };
 
-    // Handle file transfer to a peer by IP
+    const validateIp = (ip) => {
+        const ipRegex =
+            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        return ipRegex.test(ip);
+    };
+
     const handleTransfer = async (e) => {
         e.preventDefault();
-        if (!selectedFile || !recipientIp) {
-            alert("Please select a file and enter the recipient's IP address.");
+        if (!selectedTransferFile || !recipientUsername) {
+            alert("Please select a file and enter the recipient's username.");
             return;
         }
 
         const formData = new FormData();
-        formData.append("file", selectedFile);
-        formData.append("recipientIp", recipientIp); // Include recipient's IP in the request
+        formData.append("file", selectedTransferFile);
+        formData.append("recipientUsername", recipientUsername);
 
         try {
             const response = await fetch("http://localhost:5000/file/transfer", {
@@ -172,6 +177,10 @@ const Home = () => {
         }
     };
 
+    // Handle file selection for transfer
+    const handleTransferFileChange = (e) => {
+        setSelectedTransferFile(e.target.files[0]);
+    };
     return (
         <div>
             <h1>Welcome!</h1>
@@ -186,18 +195,17 @@ const Home = () => {
             </form>
 
             {/* Transfer Section */}
-            <h2>Transfer a File to a Peer</h2>
+            <h2>Transfer a File to a Peer by Username</h2>
             <form onSubmit={handleTransfer}>
-                <input type="file" onChange={handleFileChange} />
+                <input type="file" onChange={handleTransferFileChange} /> {/* File input for transfer */}
                 <input
                     type="text"
-                    placeholder="Recipient IP Address"
-                    value={recipientIp}
-                    onChange={(e) => setRecipientIp(e.target.value)}
+                    placeholder="Recipient Username"
+                    value={recipientUsername}
+                    onChange={(e) => setRecipientUsername(e.target.value)}
                 />
                 <button type="submit">Transfer</button>
             </form>
-
             {/* Search Section */}
             <h2>Search Files</h2>
             <input type="text" placeholder="Search for files..." value={searchQuery} onChange={handleSearch} />

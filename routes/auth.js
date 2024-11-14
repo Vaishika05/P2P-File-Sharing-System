@@ -36,6 +36,12 @@ router.post("/login", async (req, res) => {
         user.ipAddress = userIpAddress;
         await user.save();
 
+        // await Peer.findOneAndUpdate(
+        //     { username },
+        //     { username, ipAddress: userIpAddress, status: "online", lastActive: new Date() },
+        //     { upsert: true }
+        // );
+
         // Generate a token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1h", // Token expires in 1 hour
@@ -69,5 +75,4 @@ router.post("/logout", (req, res) => {
         return res.status(200).send("Logged out successfully");
     });
 });
-
 module.exports = router;
