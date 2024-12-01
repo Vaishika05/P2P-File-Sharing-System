@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import styles from "./Login.module.css";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -35,28 +36,37 @@ const Login = () => {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            <form onSubmit={handleLogin}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Login</button>
-            </form>
-            <p>
-                Don't have an account? <a href="/register">Sign up</a>
-            </p>
+        <div className={styles.container}>
+            <div className={styles.card}>
+                <h2 className={styles.title}>Welcome Back</h2>
+                <form className={styles.form} onSubmit={handleLogin}>
+                    <input
+                        type="text"
+                        placeholder="Enter your username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        className={styles.input}
+                    />
+                    <input
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className={styles.input}
+                    />
+                    <button type="submit" className={styles.button}>
+                        Login
+                    </button>
+                </form>
+                <p className={styles.redirectText}>
+                    Don't have an account?{" "}
+                    <a href="/register" className={styles.link}>
+                        Sign up
+                    </a>
+                </p>
+            </div>
         </div>
     );
 };
