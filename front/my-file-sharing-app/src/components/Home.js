@@ -39,6 +39,7 @@ const Home = () => {
 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log(data.files); // Check the structure of the files
                     setFiles(data.files); // Set all files
                     setFilteredFiles(data.files); // Initialize the filtered files list
                 } else {
@@ -216,6 +217,7 @@ const Home = () => {
                 {filteredFiles.map((file) => (
                     <li key={file.filename}>
                         <span>{file.filename}</span>
+                        {file.username && <span>Uploaded by: {file.username}</span>} {/* Check if username exists */}
                         <button onClick={() => handleDownload(file.filename)}>Download</button>
                         <button onClick={() => handleDelete(file.filename)}>Delete</button>
                     </li>
